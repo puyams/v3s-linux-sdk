@@ -1,0 +1,2 @@
+# Aliases extracted from modules themselves.
+alias i2c:ov5647_mipi ov5647_mipi

@@ -1,0 +1,9 @@
+kernel/fs/fatfs/fatfs.ko:
+kernel/drivers/input/sw-device.ko:
+kernel/drivers/media/video/sunxi-vfe/vfe_os.ko:
+kernel/drivers/media/video/sunxi-vfe/vfe_subdev.ko: kernel/drivers/media/video/sunxi-vfe/vfe_os.ko
+kernel/drivers/media/video/sunxi-vfe/device/ov5647_mipi.ko: kernel/drivers/media/video/sunxi-vfe/vfe_subdev.ko kernel/drivers/media/video/sunxi-vfe/vfe_os.ko kernel/drivers/media/video/sunxi-vfe/csi_cci/cci.ko
+kernel/drivers/media/video/sunxi-vfe/csi_cci/cci.ko:
+kernel/drivers/media/video/sunxi-vfe/vfe_v4l2.ko: kernel/drivers/media/video/videobuf-dma-contig.ko kernel/drivers/media/video/videobuf-core.ko kernel/drivers/media/video/sunxi-vfe/vfe_subdev.ko kernel/drivers/media/video/sunxi-vfe/vfe_os.ko kernel/drivers/media/video/sunxi-vfe/csi_cci/cci.ko
+kernel/drivers/media/video/videobuf-core.ko:
+kernel/drivers/media/video/videobuf-dma-contig.ko: kernel/drivers/media/video/videobuf-core.ko
