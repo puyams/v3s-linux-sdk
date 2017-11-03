@@ -86,4 +86,4 @@ load mmc 0:1 0x41000000 script.bin;sf probe 0;sf erase 0x80000 0x80000;sf write 
 load mmc 0:1 0x41000000 uImage;sf probe 0;sf erase 0x100000 0x300000;sf write 0x41000000 0x100000 0x300000
 
 # burning rootfs
-load mmc 0:1 0x41000000 rootfs.jffs2;sf probe 0;sf erase 0x400000 0xC00000;sf write 0x41000000 0x400000 0xxx(rootfs.jff2实际大小)
+load mmc 0:1 0x41000000 rootfs.jffs2;sf probe 0;sf erase 0x400000 0xC00000;sf write 0x41000000 0x400000 0xxx(rootfs.jff2 file size)
