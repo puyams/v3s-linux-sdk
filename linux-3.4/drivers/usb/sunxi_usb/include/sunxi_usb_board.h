@@ -35,8 +35,6 @@
 #define  KEY_USB_RESTRICT_GPIO			"usb_restrict_gpio"
 #define  KEY_USB_REGULATOR_IO			"usb_regulator_io"
 #define  KEY_USB_REGULATOR_IO_VOL		"usb_regulator_vol"
-#define  KEY_USB_REGULATOR_ID_VBUS		"usb_regulator_id_vbus"
-#define  KEY_USB_REGULATOR_ID_VBUS_VOL		"usb_regulator_id_vbus_vol"
 
 #define  KEY_USB_HOST_INIT_STATE    		"usb_host_init_state"
 #define  KEY_USB_USB_RESTRICT_FLAG  		"usb_restric_flag"

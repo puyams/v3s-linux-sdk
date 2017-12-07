@@ -274,7 +274,7 @@ __s32 usbc0_platform_device_init(struct usb_port_info *port_info)
 {
 	/* device */
 #ifndef CONFIG_ARCH_SUN9IW1
-#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8)
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW9) 
 	sunxi_udc_cfg.port_info = port_info;
 	sunxi_udc_cfg.usbc_base = (unsigned int __force)SUNXI_USB_OTG_VBASE;
 

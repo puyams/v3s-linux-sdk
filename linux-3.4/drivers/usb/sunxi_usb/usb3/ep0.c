@@ -545,12 +545,18 @@ static void sunxi_ep0_complete_data(struct sunxi_otgc *otgc,
 
 		sunxi_ep0_stall_and_restart(otgc);
 	} else {
-		/*
-		 * handle the case where we have to send a zero packet. This
-		 * seems to be case when req.length > maxpacket. Could it be?
-		 */
-		if (r)
-			sunxi_gadget_giveback(ep0, r, 0);
+
+		sunxi_gadget_giveback(ep0, r, 0);
+
+		if (IS_ALIGNED(ur->length, ep0->endpoint.maxpacket) &&
+			ur->length && ur->zero) {
+			int ret;
+			otgc->ep0_next_event = SUNXI_EP0_COMPLETE;
+			ret = sunxi_ep0_start_trans(otgc, epnum,
+				otgc->ctrl_req_addr, 0,
+				SUNXI_TRBCTL_CONTROL_DATA);
+				WARN_ON(ret < 0);
+		}
 	}
 }
 
@@ -645,6 +651,9 @@ static void sunxi_ep0_do_control_data(struct sunxi_otgc *otgc,
 				SUNXI_TRBCTL_CONTROL_DATA);
 	} else if ((req->request.length % dep->endpoint.maxpacket)
 			&& (event->endpoint_number == 0)) {
+		u32	transfer_size;
+		u32	maxpacket;
+
 		ret = usb_gadget_map_request(&otgc->gadget, &req->request,
 				event->endpoint_number);
 		if (ret) {
@@ -652,9 +661,11 @@ static void sunxi_ep0_do_control_data(struct sunxi_otgc *otgc,
 			return;
 		}
 
-		WARN_ON(req->request.length > dep->endpoint.maxpacket);
+		WARN_ON(req->request.length > 512);
 
 		otgc->ep0_bounced = true;
+		maxpacket = dep->endpoint.maxpacket;
+		transfer_size = roundup(req->request.length, maxpacket);
 
 		/*
 		 * REVISIT in case request length is bigger than EP0
@@ -662,7 +673,7 @@ static void sunxi_ep0_do_control_data(struct sunxi_otgc *otgc,
 		 * the transfer.
 		 */
 		ret = sunxi_ep0_start_trans(otgc, event->endpoint_number,
-				otgc->ep0_bounce_addr, dep->endpoint.maxpacket,
+				otgc->ep0_bounce_addr, transfer_size,
 				SUNXI_TRBCTL_CONTROL_DATA);
 	} else {
 		ret = usb_gadget_map_request(&otgc->gadget, &req->request,

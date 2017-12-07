@@ -50,7 +50,7 @@ struct usb_cfg g_usb_cfg;
 __u32 thread_device_run_flag = 0;
 __u32 thread_host_run_flag = 0;
 
-#ifdef CONFIG_ARCH_SUN8IW6
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW9)
 struct completion hcd_complete_notify;
 struct completion udc_complete_notify;
 #endif
@@ -225,7 +225,7 @@ static int usb_device_scan_thread(void * pArg)
 	while(thread_device_run_flag) {
 
 		msleep(1000);  /* 1s */
-#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8)
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8) || defined (CONFIG_ARCH_SUN8IW9)
 		wait_for_completion(&udc_complete_notify);
 #endif
 		hw_rmmod_usb_host();
@@ -251,7 +251,7 @@ static int usb_host_scan_thread(void * pArg)
 	while(thread_host_run_flag) {
 
 		msleep(1000);  /* 1s */
-#ifdef CONFIG_ARCH_SUN8IW6
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW9)
 		wait_for_completion(&hcd_complete_notify);
 #endif
 		hw_rmmod_usb_host();
@@ -677,7 +677,7 @@ static int __init usb_manager_init(void)
 
 	if (g_usb_cfg.port[0].port_type == USB_PORT_TYPE_DEVICE) {
 
-#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8)
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8) || defined (CONFIG_ARCH_SUN8IW9)
 		init_completion(&udc_complete_notify);
 #endif
 		thread_device_run_flag = 1;
@@ -697,7 +697,7 @@ static int __init usb_manager_init(void)
 		}
 #else
 
-#ifdef CONFIG_ARCH_SUN8IW6
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW9)
 		init_completion(&hcd_complete_notify);
 #endif
 		thread_host_run_flag = 1;

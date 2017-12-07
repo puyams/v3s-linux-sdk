@@ -63,7 +63,7 @@ static u8 is_udc_enable = 0;   /* is udc enable by gadget? */
 static struct platform_device *g_udc_pdev = NULL;
 #endif
 
-#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8)
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8) || defined (CONFIG_ARCH_SUN8IW9)
 extern struct completion udc_complete_notify;
 #endif
 
@@ -3015,7 +3015,7 @@ static int sunxi_udc_probe_otg(struct platform_device *pdev)
 	device_create_file(&pdev->dev, &dev_attr_msc_read_debug);
 	device_create_file(&pdev->dev, &dev_attr_msc_write_debug);
 
-#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8)
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8) || defined (CONFIG_ARCH_SUN8IW9)
 {
 	struct sunxi_udc_mach_info *udc_cfg = pdev->dev.platform_data;
 	if(udc_cfg->port_info->port_type == USB_PORT_TYPE_DEVICE){
@@ -3042,7 +3042,7 @@ static int sunxi_udc_remove_otg(struct platform_device *pdev)
 
 	return 0;
 }
-#if !defined (CONFIG_ARCH_SUN8IW6) && !defined (CONFIG_ARCH_SUN8IW7) && !defined (CONFIG_ARCH_SUN8IW8)
+#if !defined (CONFIG_ARCH_SUN8IW6) && !defined (CONFIG_ARCH_SUN8IW7) && !defined (CONFIG_ARCH_SUN8IW8)  && !defined (CONFIG_ARCH_SUN8IW9)
 static int sunxi_udc_probe_device_only(struct platform_device *pdev)
 {
 	struct sunxi_udc *udc	= &sunxi_udc;
@@ -3131,7 +3131,7 @@ static int sunxi_udc_remove_device_only(struct platform_device *pdev)
 static int __init sunxi_udc_probe(struct platform_device *pdev)
 {
 #ifdef  CONFIG_USB_SUNXI_USB0_OTG
-#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8)
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8) || defined (CONFIG_ARCH_SUN8IW9)
 	return sunxi_udc_probe_otg(pdev);
 #else
 	struct sunxi_udc_mach_info *udc_cfg = pdev->dev.platform_data;
@@ -3158,7 +3158,7 @@ static int __init sunxi_udc_probe(struct platform_device *pdev)
 static int __exit sunxi_udc_remove(struct platform_device *pdev)
 {
 #ifdef  CONFIG_USB_SUNXI_USB0_OTG
-#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8)
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW7) || defined (CONFIG_ARCH_SUN8IW8) || defined (CONFIG_ARCH_SUN8IW9)
 	return sunxi_udc_remove_otg(pdev);
 #else
 

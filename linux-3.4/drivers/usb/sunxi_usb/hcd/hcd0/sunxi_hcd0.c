@@ -47,7 +47,7 @@ static const char sunxi_hcd_driver_name[] = SW_HCD_DRIVER_NAME;
 
 static struct scene_lock  otg_standby_lock;
 
-#ifdef CONFIG_ARCH_SUN8IW6
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW9)
 extern struct completion hcd_complete_notify;
 #endif
 
@@ -241,29 +241,6 @@ static s32 request_usb_regulator(sunxi_hcd_io_t *sunxi_hcd_io)
 			return 0;
 		}
 
-		if(regulator_set_voltage(sunxi_hcd_io->regulator_io_hdle , sunxi_hcd_io->regulator_io_vol, sunxi_hcd_io->regulator_io_vol) < 0 ){
-			DMSG_PANIC("ERR:usb0 regulator set io voltage:fail\n");
-			regulator_put(sunxi_hcd_io->regulator_io_hdle);
-			return 0;
-		}
-	}
-
-	if(sunxi_hcd_io->regulator_id_vbus != NULL){
-		sunxi_hcd_io->regulator_id_vbus_hdle= regulator_get(NULL, sunxi_hcd_io->regulator_id_vbus);
-		if(IS_ERR(sunxi_hcd_io->regulator_id_vbus_hdle)) {
-			DMSG_PANIC("ERR: some error happen, usb0 regulator_id_vbus_hdle fail to get regulator!");
-			return 0;
-		}
-
-		if(regulator_set_voltage(sunxi_hcd_io->regulator_id_vbus_hdle , sunxi_hcd_io->regulator_id_vbus_vol, sunxi_hcd_io->regulator_id_vbus_vol) < 0 ){
-			DMSG_PANIC("ERR:usb0 regulator set id vbus voltage:fail\n");
-			regulator_put(sunxi_hcd_io->regulator_id_vbus_hdle);
-			return 0;
-		}
-
-		if(regulator_enable(sunxi_hcd_io->regulator_id_vbus_hdle) < 0){
-			DMSG_INFO_HCD0("ERR: usb0 id vbus regulator_enable fail\n");
-		}
 	}
 
 	return 0;
@@ -275,10 +252,7 @@ static s32 release_usb_regulator(sunxi_hcd_io_t *sunxi_hcd_io)
 		regulator_put(sunxi_hcd_io->regulator_io_hdle);
 		sunxi_hcd_io->regulator_io_hdle = NULL;
 	}
-	if(sunxi_hcd_io->regulator_id_vbus != NULL){
-		regulator_put(sunxi_hcd_io->regulator_id_vbus_hdle);
-		sunxi_hcd_io->regulator_id_vbus_hdle = NULL;
-	}
+
 	return 0;
 }
 
@@ -349,7 +323,7 @@ static s32 open_usb_clock(sunxi_hcd_io_t *sunxi_hcd_io)
 			sunxi_hcd_io->ahb_otg, sunxi_hcd_io->mod_usbotg, sunxi_hcd_io->mod_usbphy, sunxi_hcd_io->clk_is_open);
 	}
 
-#ifdef  CONFIG_ARCH_SUN8IW6
+#if defined (CONFIG_ARCH_SUN8IW6)
 	USBC_PHY_Set_Ctl(sunxi_hcd_io->usb_vbase, USBC_PHY_CTL_VBUSVLDEXT);
 	USBC_PHY_Clear_Ctl(sunxi_hcd_io->usb_vbase, USBC_PHY_CTL_SIDDQ);
 #else
@@ -389,8 +363,8 @@ static s32 close_usb_clock(sunxi_hcd_io_t *sunxi_hcd_io)
 		(u32)USBC_Readl(sunxi_hcd_io->clock_vbase + 0x2c0));
 	*/
 
-#ifdef  CONFIG_ARCH_SUN8IW6
-		USBC_PHY_Set_Ctl(sunxi_hcd_io->usb_vbase, USBC_PHY_CTL_SIDDQ);
+#if defined (CONFIG_ARCH_SUN8IW6)
+	USBC_PHY_Set_Ctl(sunxi_hcd_io->usb_vbase, USBC_PHY_CTL_SIDDQ);
 #endif
 
 	return 0;
@@ -421,6 +395,7 @@ static __s32 pin_init(sunxi_hcd_io_t *sunxi_hcd_io)
 		sunxi_hcd_io->drv_vbus_valid = 0;
 	}
 
+
 	if (sunxi_hcd_io->drv_vbus_valid) {
 		ret = gpio_request(sunxi_hcd_io->drv_vbus_gpio_set.gpio.gpio, "otg_drv_vbus");
 		if (ret != 0) {
@@ -443,40 +418,10 @@ static __s32 pin_init(sunxi_hcd_io_t *sunxi_hcd_io)
 			sunxi_hcd_io->regulator_io = NULL;
 		}else{
 			sunxi_hcd_io->regulator_io = item_temp.str;
-
-			type = script_get_item(SET_USB0, KEY_USB_REGULATOR_IO_VOL, &item_temp);
-			if(type == SCIRPT_ITEM_VALUE_TYPE_INT){
-				sunxi_hcd_io->regulator_io_vol = item_temp.val;
-			}else{
-				DMSG_INFO_HCD0("get usb io voltage is failed\n");
-				sunxi_hcd_io->regulator_io_vol = 0;
-			}
 		}
 	}else {
 		DMSG_INFO_HCD0("usb_regulator io is not exist\n");
 		sunxi_hcd_io->regulator_io = NULL;
-	}
-
-	/* get regulator information */
-	type = script_get_item(SET_USB0, KEY_USB_REGULATOR_ID_VBUS, &item_temp);
-	if (type == SCIRPT_ITEM_VALUE_TYPE_STR) {
-		if (!strcmp(item_temp.str, "nocare")) {
-			DMSG_INFO_HCD0("get usb_regulator id vbus is nocare\n");
-			sunxi_hcd_io->regulator_id_vbus = NULL;
-		}else{
-			sunxi_hcd_io->regulator_id_vbus = item_temp.str;
-
-			type = script_get_item(SET_USB0, KEY_USB_REGULATOR_ID_VBUS_VOL, &item_temp);
-			if(type == SCIRPT_ITEM_VALUE_TYPE_INT){
-				sunxi_hcd_io->regulator_id_vbus_vol = item_temp.val;
-			}else{
-				DMSG_INFO_HCD0("get usb id voltage is failed\n");
-				sunxi_hcd_io->regulator_id_vbus_vol = 0;
-			}
-		}
-	}else {
-		DMSG_INFO_HCD0("usb_regulator id vbus io is not exist\n");
-		sunxi_hcd_io->regulator_id_vbus = NULL;
 	}
 
 	type = script_get_item(SET_USB0, KEY_USB_USB_NOT_SUSPEND, &item_temp);
@@ -630,23 +575,13 @@ static void sunxi_set_regulator_io(struct sunxi_hcd *sunxi_hcd, int is_on)
 }
 static void sunxi_hcd_board_set_vbus(struct sunxi_hcd *sunxi_hcd, int is_on)
 {
-#ifndef  SUNXI_USB_FPGA
-	u32 on_off = 0;
-#endif
 
 	DMSG_INFO_HCD0("[%s]: Set USB Power %s\n", sunxi_hcd->driver_name, (is_on ? "ON" : "OFF"));
 
 #ifndef  SUNXI_USB_FPGA
-	/* set power */
-	if (sunxi_hcd->sunxi_hcd_io->drv_vbus_gpio_set.gpio.data == 0) {
-		on_off = is_on ? 1 : 0;
-	} else {
-		on_off = is_on ? 0 : 1;
-	}
-
 	/* set gpio data */
 	if (sunxi_hcd->sunxi_hcd_io->drv_vbus_valid) {
-		__gpio_set_value(sunxi_hcd->sunxi_hcd_io->drv_vbus_gpio_set.gpio.gpio, on_off);
+		__gpio_set_value(sunxi_hcd->sunxi_hcd_io->drv_vbus_gpio_set.gpio.gpio, is_on);
 	}
 #endif
 
@@ -1700,7 +1635,7 @@ static int sunxi_hcd_probe_otg(struct platform_device *pdev)
 		goto end;
 	}
 
-#ifdef CONFIG_ARCH_SUN8IW6
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW9)
 {
 	struct sunxi_hcd_platform_data *pdata = pdev->dev.platform_data;
 	if(pdata->config->port_info->port_type == USB_PORT_TYPE_HOST){
@@ -1743,7 +1678,8 @@ static int sunxi_hcd_remove_otg(struct platform_device *pdev)
  * bridge to a platform device; this driver then suffices.
  *
  */
-#ifndef CONFIG_ARCH_SUN8IW6
+
+#if !defined (CONFIG_ARCH_SUN8IW6) && !defined (CONFIG_ARCH_SUN8IW9)
 static int sunxi_hcd_probe_host_only(struct platform_device *pdev)
 {
 	struct device   *dev    = &pdev->dev;
@@ -1819,7 +1755,7 @@ static int sunxi_hcd_remove_host_only(struct platform_device *pdev)
 static int __init sunxi_hcd_probe(struct platform_device *pdev)
 {
 #ifdef  CONFIG_USB_SUNXI_USB0_OTG
-#ifdef CONFIG_ARCH_SUN8IW6
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW9)
 	return sunxi_hcd_probe_otg(pdev);
 #else
 
@@ -1846,7 +1782,7 @@ static int __init sunxi_hcd_probe(struct platform_device *pdev)
 static int __exit sunxi_hcd_remove(struct platform_device *pdev)
 {
 #ifdef  CONFIG_USB_SUNXI_USB0_OTG
-#ifdef CONFIG_ARCH_SUN8IW6
+#if defined (CONFIG_ARCH_SUN8IW6) || defined (CONFIG_ARCH_SUN8IW9)
 	return sunxi_hcd_remove_otg(pdev);
 #else
 	struct sunxi_hcd_platform_data	*pdata = pdev->dev.platform_data;

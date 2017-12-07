@@ -31,6 +31,8 @@ make ARCH=arm CROSS_COMPILE=arm-linux-gnueabi- -j16 INSTALL_MOD_PATH=out modules
 
 cp arch/arm/boot/uImage ../pub/boot
 
+cp out/lib ../buildroot-2017.08/board/sunxi/rootfs-overlay -rf
+
 # build sunxi-tools
 
 cd tool/sunxi-tools
@@ -57,21 +59,22 @@ make
 
 cp -rf output/target/* ../pub/rootfs
 
-# Boot
-
-cd pub
-
-cp boot.scr script.bin uImage your_sdcard_1st_partion
-
-sudo cp rootfs/* your_sdcard_2st_partion
-
 # build rootfs.jffs2
 
 cd pub/
 
 ../tools/filesystem/mkfs.jffs2 -d rootfs -l -e 0x10000 -o rootfs.jffs2
 
-# Nor Spi Flash
+# Boot
+
+## SD card boot
+cd pub
+
+cp boot.scr script.bin uImage your_sdcard_1st_partion
+
+sudo cp rootfs/* your_sdcard_2st_partion
+
+## Nor Spi Flash Boot
 # burning uboot
 load mmc 0:1 0x41000000 u-boot-sunxi-with-spl.bin;sf probe 0;sf erase 0 0x80000;sf write 0x41000000 0 0x80000
 

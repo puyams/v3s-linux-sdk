@@ -1,0 +1,7 @@
+#!/bin/sh
+#
+# Start adb....
+#
+
+echo "start usb adb..."
+/etc/init.d/adbd.init &
